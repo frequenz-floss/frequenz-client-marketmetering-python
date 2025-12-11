@@ -70,7 +70,7 @@ dev-mkdocs = [
   "black == 25.9.0",
   "Markdown == 3.9",
   "mike == 2.1.3",
-  "mkdocs-gen-files == 0.5.0",
+  "mkdocs-gen-files == 0.6.0",
   "mkdocs-literate-nav == 0.6.2",
   "frequenz-api-marketmetering @ git+https://github.com/frequenz-io/frequenz-api-market-metering.git@v0.x.x",
   "mkdocs-macros-plugin == 1.4.1",
