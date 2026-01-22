@@ -1,1 +1,10 @@
-[]
+[
+  {
+    "version": "v0.0-dev",
+    "title": "v0.0-dev (b96017a)",
+    "aliases": [
+      "v0-dev",
+      "latest-dev"
+    ]
+  }
+]
