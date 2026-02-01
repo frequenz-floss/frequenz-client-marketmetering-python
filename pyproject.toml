@@ -61,7 +61,7 @@ cli = [
 dev-flake8 = [
   "flake8 == 7.3.0",
   "flake8-docstrings == 1.7.0",
-  "flake8-pyproject == 1.2.3",  # For reading the flake8 config from pyproject.toml
+  "flake8-pyproject == 1.2.4",  # For reading the flake8 config from pyproject.toml
   "pydoclint == 0.8.3",
   "pydocstyle == 6.3.0",
 ]
@@ -75,7 +75,7 @@ dev-mkdocs = [
   "frequenz-api-marketmetering @ git+https://github.com/frequenz-floss/frequenz-api-market-metering.git@f1c0da3131a6472b647094bf312969d68cd89df2",
   "mkdocs-macros-plugin == 1.4.1",
   "mkdocs-material == 9.6.23",
-  "mkdocstrings[python] == 1.0.0",
+  "mkdocstrings[python] == 1.0.2",
   "frequenz-repo-config[lib] == 0.14.0",
 ]
 dev-mypy = [
