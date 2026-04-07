@@ -3,33 +3,14 @@
 
 """Integration tests for the MarketMeteringApiClient against a live service.
 
-These tests require a running marketmetering service and are excluded from
-CI by default. To run them:
+These tests use testcontainers to spin up GreptimeDB and run the
+marketmeteringd service binary. They require:
+1. Docker to be running
+2. The marketmeteringd binary to be built (run 'cargo build --release' in the service repo)
+3. The service repo to be checked out at ../frequenz-service-marketmetering
 
-    1. Start the service with auth disabled and test storage backend:
-
-        ./target/release/marketmeteringd -c test-config.toml
-
-       Where test-config.toml contains:
-
-        [net]
-        ip = "[::1]"
-        port = 50051
-
-        [auth]
-        enabled = false
-
-        [storage]
-        backend = "test"
-
-    2. Run the tests:
-
-        uv run pytest -m integration
+To run: uv run pytest -m integration
 """
-
-import os
-import socket
-from collections.abc import AsyncIterator
 
 import grpc
 import pytest
@@ -47,34 +28,6 @@ from frequenz.client.marketmetering.types import (
     MetricType,
     TimeResolution,
 )
-
-SERVICE_URL = "grpc://[::1]:50051?ssl=false"
-AUTH_KEY = "test-key"
-
-pytestmark = pytest.mark.integration
-
-
-def _service_available() -> bool:
-    """Check whether the local integration test service is reachable."""
-    with socket.socket(socket.AF_INET6, socket.SOCK_STREAM) as sock:
-        sock.settimeout(0.5)
-        return sock.connect_ex(("::1", 50051, 0, 0)) == 0
-
-
-@pytest.fixture
-async def client() -> AsyncIterator[MarketMeteringApiClient]:
-    """Create a connected client for testing."""
-    if os.environ.get("CI") == "true":
-        pytest.skip("integration tests are not run in CI")
-
-    if not _service_available():
-        pytest.skip("integration test service is not running on [::1]:50051")
-
-    c = MarketMeteringApiClient(
-        server_url=SERVICE_URL,
-        auth_key=AUTH_KEY,
-    )
-    yield c
 
 
 def make_ref(
