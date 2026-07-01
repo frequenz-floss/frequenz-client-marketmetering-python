@@ -4,7 +4,7 @@
 [build-system]
 requires = [
   "setuptools == 82.0.1",
-  "setuptools_scm[toml] == 10.0.5",
+  "setuptools_scm[toml] == 10.2.0",
   "frequenz-repo-config[lib] == 0.18.0",
 ]
 build-backend = "setuptools.build_meta"
@@ -54,7 +54,7 @@ email = "floss@frequenz.com"
 
 [project.optional-dependencies]
 cli = [
-  "asyncclick == 8.3.0.7",
+  "asyncclick == 8.4.2.1",
   "prompt-toolkit == 3.0.52",
 ]
 
@@ -95,7 +95,7 @@ dev-pylint = [
   "frequenz-api-marketmetering @ git+https://github.com/frequenz-floss/frequenz-api-marketmetering.git@d9a23f31446eeb62fe6599af23c49e563d49f0f3",
 ]
 dev-pytest = [
-  "pytest == 9.0.3",
+  "pytest == 9.1.1",
   "frequenz-repo-config[extra-lint-examples] == 0.18.0",
   "pytest-mock == 3.15.1",
   "pytest-asyncio == 1.4.0",
