@@ -1,15 +1,1 @@
-[
-  {
-    "version": "v0.2-dev",
-    "title": "v0.2-dev (a20fd7f)",
-    "aliases": [
-      "v0-dev",
-      "latest-dev"
-    ]
-  },
-  {
-    "version": "v0.0-dev",
-    "title": "v0.0-dev (980e2a3)",
-    "aliases": []
-  }
-]
+[{"version":"v0.2-dev","title":"v0.2-dev (a20fd7f)","aliases":["v0-dev","latest-dev"]},{"version":"v0.0-dev","title":"v0.0-dev (980e2a3)","aliases":[]}]
