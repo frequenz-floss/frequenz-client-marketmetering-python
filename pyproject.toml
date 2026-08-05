@@ -39,7 +39,7 @@ classifiers = [
 requires-python = ">= 3.11, < 4"
 dependencies = [
   "typing-extensions >= 4.13.0, < 5",
-  "frequenz-api-marketmetering @ git+https://github.com/frequenz-floss/frequenz-api-marketmetering.git@3e90def4de424cf5339db4f025c5a33767f4ab19",
+  "frequenz-api-marketmetering >= 0.1.0, < 0.2.0",
   "frequenz-client-base >= 0.11.0, < 0.12.0",
   "grpcio >= 1.81.1, < 2",
 ]
@@ -73,7 +73,7 @@ dev-mkdocs = [
   "mike == 2.2.0",
   "mkdocs-gen-files == 0.6.1",
   "mkdocs-literate-nav == 0.6.3",
-  "frequenz-api-marketmetering @ git+https://github.com/frequenz-floss/frequenz-api-marketmetering.git@3e90def4de424cf5339db4f025c5a33767f4ab19",
+  "frequenz-api-marketmetering == 0.1.0",
   "mkdocs-macros-plugin == 1.5.0",
   "mkdocs-material == 9.7.6",
   "mkdocstrings[python] == 1.0.6",
@@ -92,7 +92,7 @@ dev-pylint = [
   "pylint == 4.0.6",
   # For checking the noxfile, docs/ script, and tests
   "frequenz-client-marketmetering[cli,dev-mkdocs,dev-noxfile,dev-pytest]",
-  "frequenz-api-marketmetering @ git+https://github.com/frequenz-floss/frequenz-api-marketmetering.git@3e90def4de424cf5339db4f025c5a33767f4ab19",
+  "frequenz-api-marketmetering == 0.1.0",
 ]
 dev-pytest = [
   "pytest == 9.0.3",
