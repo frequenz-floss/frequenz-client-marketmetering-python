@@ -4,7 +4,7 @@
 [build-system]
 requires = [
   "setuptools == 83.0.0",
-  "setuptools_scm[toml] == 10.0.5",
+  "setuptools_scm[toml] == 10.2.1",
   "frequenz-repo-config[lib] == 0.18.0",
 ]
 build-backend = "setuptools.build_meta"
@@ -54,7 +54,7 @@ email = "floss@frequenz.com"
 
 [project.optional-dependencies]
 cli = [
-  "asyncclick == 8.3.0.7",
+  "asyncclick == 8.4.2.1",
   "prompt-toolkit == 3.0.52",
 ]
 
@@ -80,14 +80,14 @@ dev-mkdocs = [
   "frequenz-repo-config[lib] == 0.18.0",
 ]
 dev-mypy = [
-  "mypy == 2.1.0",
+  "mypy == 2.3.0",
   "types-Markdown == 3.10.2.20260518",
   # For checking the noxfile, docs/ script, and tests
   "frequenz-client-marketmetering[cli,dev-mkdocs,dev-noxfile,dev-pytest]",
   "grpc-stubs == 1.53.0.6",
   "types-protobuf == 7.34.1.20260518",
 ]
-dev-noxfile = ["nox == 2026.4.10", "frequenz-repo-config[lib] == 0.18.0"]
+dev-noxfile = ["nox == 2026.7.11", "frequenz-repo-config[lib] == 0.18.0"]
 dev-pylint = [
   "pylint == 4.0.6",
   # For checking the noxfile, docs/ script, and tests
@@ -95,7 +95,7 @@ dev-pylint = [
   "frequenz-api-marketmetering == 0.1.0",
 ]
 dev-pytest = [
-  "pytest == 9.0.3",
+  "pytest == 9.1.1",
   "frequenz-repo-config[extra-lint-examples] == 0.18.0",
   "pytest-mock == 3.15.1",
   "pytest-asyncio == 1.4.0",
