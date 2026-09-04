@@ -270,7 +270,7 @@ def parse_market_location(value: str) -> MarketLocationRef:
     )
 
 
-class MarketLocationParamType(click.ParamType):
+class MarketLocationParamType(click.ParamType[MarketLocationRef]):
     """Click parameter type for market locations."""
 
     name = "market_location"
