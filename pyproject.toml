@@ -3,9 +3,9 @@
 
 [build-system]
 requires = [
-  "setuptools == 83.0.0",
-  "setuptools_scm[toml] == 10.0.5",
-  "frequenz-repo-config[lib] == 0.18.0",
+  "setuptools == 84.0.0",
+  "setuptools_scm[toml] == 10.2.1",
+  "frequenz-repo-config[lib] == 0.19.0",
 ]
 build-backend = "setuptools.build_meta"
 
@@ -77,7 +77,7 @@ dev-mkdocs = [
   "mkdocs-macros-plugin == 1.5.0",
   "mkdocs-material == 9.7.6",
   "mkdocstrings[python] == 1.0.6",
-  "frequenz-repo-config[lib] == 0.18.0",
+  "frequenz-repo-config[lib] == 0.19.0",
 ]
 dev-mypy = [
   "mypy == 2.1.0",
@@ -87,7 +87,7 @@ dev-mypy = [
   "grpc-stubs == 1.53.0.6",
   "types-protobuf == 7.34.1.20260518",
 ]
-dev-noxfile = ["nox == 2026.4.10", "frequenz-repo-config[lib] == 0.18.0"]
+dev-noxfile = ["nox == 2026.4.10", "frequenz-repo-config[lib] == 0.19.0"]
 dev-pylint = [
   "pylint == 4.0.6",
   # For checking the noxfile, docs/ script, and tests
@@ -96,7 +96,7 @@ dev-pylint = [
 ]
 dev-pytest = [
   "pytest == 9.0.3",
-  "frequenz-repo-config[extra-lint-examples] == 0.18.0",
+  "frequenz-repo-config[extra-lint-examples] == 0.19.0",
   "pytest-mock == 3.15.1",
   "pytest-asyncio == 1.4.0",
   "async-solipsism == 0.9",
@@ -179,8 +179,8 @@ filterwarnings = [
   # chars as this is a regex
   'ignore:Protobuf gencode version .*exactly one major version older.*:UserWarning',
 ]
-addopts = "-vv"
 testpaths = ["tests", "src"]
+asyncio_debug = true
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"
 required_plugins = ["pytest-asyncio", "pytest-mock"]
@@ -189,6 +189,7 @@ markers = [
 ]
 
 [tool.mypy]
+enable_error_code = ["exhaustive-match"]
 explicit_package_bases = true
 namespace_packages = true
 # This option disables mypy cache, and it is sometimes useful to enable it if
