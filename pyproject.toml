@@ -81,7 +81,7 @@ dev-mkdocs = [
 ]
 dev-mypy = [
   "mypy == 2.3.1",
-  "types-Markdown == 3.10.2.20260518",
+  "types-Markdown == 3.10.2.20260712",
   # For checking the noxfile, docs/ script, and tests
   "frequenz-client-marketmetering[cli,dev-mkdocs,dev-noxfile,dev-pytest]",
   "grpc-stubs == 1.53.0.6",
