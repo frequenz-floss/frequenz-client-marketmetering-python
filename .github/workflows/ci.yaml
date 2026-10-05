@@ -272,6 +272,11 @@ jobs:
           python -I "$(command -v mike)" \
             deploy --update-aliases --title "$TITLE" "$VERSION" "${aliases[@]}"
 
+          # Make sure the site root (gh-pages index.html) redirects to the
+          # `latest` alias. Without this, the documentation website root URL
+          # 404s, as `mike deploy` alone never creates that redirect.
+          python -I "$(command -v mike)" set-default latest
+
       - name: Sort site versions
         if: steps.mike-version.outputs.version
         run: |
