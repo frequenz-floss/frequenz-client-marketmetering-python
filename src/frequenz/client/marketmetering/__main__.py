@@ -462,16 +462,9 @@ async def create_cmd(
     default="ONLY_ACTIVE",
     help="Activation filter (default: ONLY_ACTIVE)",
 )
-@click.option(
-    "--all-pages",
-    is_flag=True,
-    default=False,
-    help="Fetch all pages (default: first page only)",
-)
 async def list_cmd(
     ctx: click.Context,
     activation: str,
-    all_pages: bool,
 ) -> None:
     """List Market Locations for the authenticated enterprise.
 
@@ -483,7 +476,6 @@ async def list_cmd(
     Args:
         ctx: Click context with client and options.
         activation: Activation status filter.
-        all_pages: Whether to fetch all pages.
     """
     client: MarketMeteringApiClient = ctx.obj["client"]
     raw: bool = ctx.obj["raw"]
@@ -503,7 +495,7 @@ async def list_cmd(
             print_detail(entry.market_location_detail, raw=raw)
             total += 1
 
-        if not all_pages or next_page is None:
+        if next_page is None:
             break
 
     click.echo(f"Total: {total} location(s)", err=True)

@@ -8,6 +8,9 @@
 
 <!-- Here goes notes on how to upgrade from previous versions, including deprecations and what they should be replaced with -->
 
+- CLI: `list` always fetches every page, and its `--all-pages` option is
+  removed. Drop `--all-pages` from any `marketmetering-cli list` invocation.
+
 ## New Features
 
 <!-- Here goes the main new features and examples or instructions on how to use them -->
