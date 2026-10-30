@@ -17,6 +17,9 @@
 
 - CLI: `list --format csv` writes one row per Market Location to stdout, e.g.
   `marketmetering-cli list --activation ALL --format csv > malos.csv`.
+- CLI: when neither an auth key nor a signing secret is given, both are read
+  from `FREQUENZ_API_KEY` and `FREQUENZ_API_SECRET`. `MARKETMETERING_API_*` and
+  the flags still take precedence, and the two are never mixed.
 
 ## Bug Fixes
 

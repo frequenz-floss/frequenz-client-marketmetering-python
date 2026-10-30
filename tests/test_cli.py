@@ -115,3 +115,102 @@ async def test_list_csv(mocker: MockerFixture) -> None:
         "last_deactivated_time": "",
     }
     assert rows[1]["is_active"] == "False"
+
+
+async def test_credentials_fall_back_to_frequenz_env_vars(
+    mocker: MockerFixture,
+) -> None:
+    """`FREQUENZ_API_*` are used when `MARKETMETERING_API_*` are unset."""
+    client_cls = mocker.patch(
+        "frequenz.client.marketmetering.__main__.MarketMeteringApiClient"
+    )
+    client_cls.return_value.list_market_locations = AsyncMock(return_value=([], None))
+
+    result = await CliRunner().invoke(
+        cli,
+        ["--url", "grpc://x", "list"],
+        env={
+            "MARKETMETERING_API_AUTH_KEY": None,
+            "MARKETMETERING_API_SIGN_SECRET": None,
+            "FREQUENZ_API_KEY": "fallback-key",
+            "FREQUENZ_API_SECRET": "fallback-secret",
+        },
+    )
+
+    assert result.exit_code == 0, result.output
+    assert client_cls.call_args.kwargs["auth_key"] == "fallback-key"
+    assert client_cls.call_args.kwargs["sign_secret"] == "fallback-secret"
+
+
+async def test_marketmetering_env_vars_take_precedence(
+    mocker: MockerFixture,
+) -> None:
+    """`MARKETMETERING_API_*` win over `FREQUENZ_API_*`."""
+    client_cls = mocker.patch(
+        "frequenz.client.marketmetering.__main__.MarketMeteringApiClient"
+    )
+    client_cls.return_value.list_market_locations = AsyncMock(return_value=([], None))
+
+    result = await CliRunner().invoke(
+        cli,
+        ["--url", "grpc://x", "list"],
+        env={
+            "MARKETMETERING_API_AUTH_KEY": "own-key",
+            "MARKETMETERING_API_SIGN_SECRET": "own-secret",
+            "FREQUENZ_API_KEY": "fallback-key",
+            "FREQUENZ_API_SECRET": "fallback-secret",
+        },
+    )
+
+    assert result.exit_code == 0, result.output
+    assert client_cls.call_args.kwargs["auth_key"] == "own-key"
+    assert client_cls.call_args.kwargs["sign_secret"] == "own-secret"
+
+
+async def test_credentials_are_not_mixed_across_sources(
+    mocker: MockerFixture,
+) -> None:
+    """A `MARKETMETERING_API_*` key is never paired with a `FREQUENZ_API_*` secret."""
+    client_cls = mocker.patch(
+        "frequenz.client.marketmetering.__main__.MarketMeteringApiClient"
+    )
+    client_cls.return_value.list_market_locations = AsyncMock(return_value=([], None))
+
+    result = await CliRunner().invoke(
+        cli,
+        ["--url", "grpc://x", "list"],
+        env={
+            "MARKETMETERING_API_AUTH_KEY": "own-key",
+            "MARKETMETERING_API_SIGN_SECRET": None,
+            "FREQUENZ_API_KEY": "fallback-key",
+            "FREQUENZ_API_SECRET": "fallback-secret",
+        },
+    )
+
+    assert result.exit_code == 0, result.output
+    assert client_cls.call_args.kwargs["auth_key"] == "own-key"
+    assert client_cls.call_args.kwargs["sign_secret"] is None
+
+
+async def test_secret_without_key_does_not_fall_back(
+    mocker: MockerFixture,
+) -> None:
+    """A `MARKETMETERING_API_*` secret alone is an error, not a mixed pair."""
+    client_cls = mocker.patch(
+        "frequenz.client.marketmetering.__main__.MarketMeteringApiClient"
+    )
+
+    result = await CliRunner().invoke(
+        cli,
+        ["--url", "grpc://x", "list"],
+        env={
+            "MARKETMETERING_API_AUTH_KEY": None,
+            "MARKETMETERING_API_SIGN_SECRET": "own-secret",
+            "FREQUENZ_API_KEY": "fallback-key",
+            "FREQUENZ_API_SECRET": "fallback-secret",
+        },
+    )
+
+    assert result.exit_code != 0
+    assert "auth key" in result.output
+    client_cls.assert_not_called()

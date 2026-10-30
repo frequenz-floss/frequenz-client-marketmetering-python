@@ -79,6 +79,8 @@ async for series in client.stream_samples(
 # Set environment variables
 export MARKETMETERING_API_URL="grpc://marketmetering.example.com"
 export MARKETMETERING_API_AUTH_KEY="your-api-key"
+export MARKETMETERING_API_SIGN_SECRET="your-secret"  # optional
+# If neither is set, FREQUENZ_API_KEY and FREQUENZ_API_SECRET are used as a pair.
 
 # Stream samples from a German Market Location
 marketmetering-cli stream EU_DE:DE01234567890:MALO_ID

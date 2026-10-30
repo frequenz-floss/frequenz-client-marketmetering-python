@@ -203,7 +203,10 @@ def print_operation_result(
 )
 @click.option(
     "--auth-key",
-    help="API auth key for authentication",
+    help=(
+        "API auth key for authentication. If neither key nor secret is given, "
+        "both are read from FREQUENZ_API_KEY and FREQUENZ_API_SECRET."
+    ),
     envvar="MARKETMETERING_API_AUTH_KEY",
     show_envvar=True,
     required=False,
@@ -235,10 +238,16 @@ async def cli(
     if ctx.obj is None:
         ctx.obj = {}
 
+    # Take the fallback as a pair so a key and secret from different sources
+    # are never combined.
+    if not auth_key and not sign_secret:
+        auth_key = os.environ.get("FREQUENZ_API_KEY")
+        sign_secret = os.environ.get("FREQUENZ_API_SECRET")
+
     if not auth_key:
         raise click.BadParameter(
-            "You must provide an API auth key using --auth-key or "
-            "the MARKETMETERING_API_AUTH_KEY environment variable."
+            "You must provide an API auth key using --auth-key or the "
+            "MARKETMETERING_API_AUTH_KEY (or FREQUENZ_API_KEY) environment variable."
         )
 
     click.echo(f"Using API URL: {url}", err=True)
