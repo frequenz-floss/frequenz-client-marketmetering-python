@@ -15,6 +15,9 @@
 
 <!-- Here goes the main new features and examples or instructions on how to use them -->
 
+- CLI: `list --format csv` writes one row per Market Location to stdout, e.g.
+  `marketmetering-cli list --activation ALL --format csv > malos.csv`.
+
 ## Bug Fixes
 
 <!-- Here goes notable bug fixes that are worth a special mention or explanation -->

@@ -5,13 +5,15 @@
 
 from __future__ import annotations
 
+import csv
+import io
 from datetime import datetime, timezone
 from unittest.mock import AsyncMock, MagicMock
 
 from asyncclick.testing import CliRunner
 from pytest_mock import MockerFixture
 
-from frequenz.client.marketmetering.__main__ import cli
+from frequenz.client.marketmetering.__main__ import CSV_FIELDS, cli
 from frequenz.client.marketmetering.types import (
     EnergyFlowDirection,
     MarketArea,
@@ -82,3 +84,34 @@ async def test_list_fetches_all_pages(mocker: MockerFixture) -> None:
     assert result.exit_code == 0, result.output
     assert client.list_market_locations.await_count == 2
     assert "111" in result.stdout and "222" in result.stdout
+
+
+async def test_list_csv(mocker: MockerFixture) -> None:
+    """`--format csv` writes a header and one row per Market Location."""
+    _two_page_client(mocker)
+
+    result = await CliRunner().invoke(
+        cli,
+        ["--url", "grpc://x", "--auth-key", "key", "list", "--format", "csv"],
+    )
+
+    assert result.exit_code == 0, result.output
+    assert "\r" not in result.stdout
+    rows = list(csv.DictReader(io.StringIO(result.stdout)))
+    assert list(rows[0]) == CSV_FIELDS
+    assert [r["location_id"] for r in rows] == ["111", "222"]
+    assert rows[0] == {
+        "enterprise_id": "7",
+        "market_area": "EU_DE",
+        "location_id": "111",
+        "id_type": "MALO_ID",
+        "display_name": "name 111",
+        "directions": "IMPORT;EXPORT",
+        "time_resolution": "MIN_15",
+        "is_active": "True",
+        "revision": "2",
+        "create_time": "2026-01-02T03:04:05+00:00",
+        "update_time": "2026-01-02T03:04:05+00:00",
+        "last_deactivated_time": "",
+    }
+    assert rows[1]["is_active"] == "False"

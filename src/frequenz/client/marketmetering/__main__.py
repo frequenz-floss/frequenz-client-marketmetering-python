@@ -4,8 +4,10 @@
 """CLI for the Market Metering client."""
 
 import asyncio
+import csv
 import os
 import shlex
+import sys
 from datetime import datetime, timezone
 from pprint import pformat
 from typing import Any
@@ -24,6 +26,7 @@ from .types import (
     MarketArea,
     MarketLocation,
     MarketLocationDetail,
+    MarketLocationEntry,
     MarketLocationId,
     MarketLocationIdType,
     MarketLocationOperationResult,
@@ -127,6 +130,44 @@ def print_detail(detail: MarketLocationDetail, raw: bool = False) -> None:
             f"{format_datetime(detail.last_deactivated_time)}"
         )
     click.echo()
+
+
+CSV_FIELDS = [
+    "enterprise_id",
+    "market_area",
+    "location_id",
+    "id_type",
+    "display_name",
+    "directions",
+    "time_resolution",
+    "is_active",
+    "revision",
+    "create_time",
+    "update_time",
+    "last_deactivated_time",
+]
+
+
+def csv_row(entry: MarketLocationEntry) -> dict[str, Any]:
+    """Flatten a MarketLocationEntry into a row keyed by `CSV_FIELDS`."""
+    detail = entry.market_location_detail
+    ref = detail.market_location_ref
+    ml = detail.market_location
+    deactivated = detail.last_deactivated_time
+    return {
+        "enterprise_id": entry.enterprise_id,
+        "market_area": ref.market_area.name,
+        "location_id": ref.market_location_id.value,
+        "id_type": ref.market_location_id.type.name,
+        "display_name": ml.display_name,
+        "directions": ";".join(d.name for d in ml.supported_directions),
+        "time_resolution": ml.time_resolution.name,
+        "is_active": detail.is_active,
+        "revision": detail.revision,
+        "create_time": detail.create_time.isoformat(),
+        "update_time": detail.update_time.isoformat(),
+        "last_deactivated_time": deactivated.isoformat() if deactivated else "",
+    }
 
 
 def print_operation_result(
@@ -462,9 +503,17 @@ async def create_cmd(
     default="ONLY_ACTIVE",
     help="Activation filter (default: ONLY_ACTIVE)",
 )
+@click.option(
+    "--format",
+    "output_format",
+    type=click.Choice(["text", "csv"]),
+    default="text",
+    help="Output format (default: text)",
+)
 async def list_cmd(
     ctx: click.Context,
     activation: str,
+    output_format: str,
 ) -> None:
     """List Market Locations for the authenticated enterprise.
 
@@ -473,9 +522,12 @@ async def list_cmd(
 
         list --activation ALL
 
+        list --activation ALL --format csv > malos.csv
+
     Args:
         ctx: Click context with client and options.
         activation: Activation status filter.
+        output_format: Output format, `text` or `csv`.
     """
     client: MarketMeteringApiClient = ctx.obj["client"]
     raw: bool = ctx.obj["raw"]
@@ -483,6 +535,14 @@ async def list_cmd(
     filters = MarketLocationsFilter(
         activation_filter=ActivationFilter[activation],
     )
+
+    writer = (
+        csv.DictWriter(sys.stdout, fieldnames=CSV_FIELDS, lineterminator="\n")
+        if output_format == "csv"
+        else None
+    )
+    if writer:
+        writer.writeheader()
 
     total = 0
     next_page = None
@@ -492,7 +552,10 @@ async def list_cmd(
             pagination_params=next_page,
         )
         for entry in entries:
-            print_detail(entry.market_location_detail, raw=raw)
+            if writer:
+                writer.writerow(csv_row(entry))
+            else:
+                print_detail(entry.market_location_detail, raw=raw)
             total += 1
 
         if next_page is None:
