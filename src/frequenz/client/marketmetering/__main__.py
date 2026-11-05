@@ -4,8 +4,10 @@
 """CLI for the Market Metering client."""
 
 import asyncio
+import csv
 import os
 import shlex
+import sys
 from datetime import datetime, timezone
 from pprint import pformat
 from typing import Any
@@ -24,6 +26,7 @@ from .types import (
     MarketArea,
     MarketLocation,
     MarketLocationDetail,
+    MarketLocationEntry,
     MarketLocationId,
     MarketLocationIdType,
     MarketLocationOperationResult,
@@ -129,6 +132,44 @@ def print_detail(detail: MarketLocationDetail, raw: bool = False) -> None:
     click.echo()
 
 
+CSV_FIELDS = [
+    "enterprise_id",
+    "market_area",
+    "location_id",
+    "id_type",
+    "display_name",
+    "directions",
+    "time_resolution",
+    "is_active",
+    "revision",
+    "create_time",
+    "update_time",
+    "last_deactivated_time",
+]
+
+
+def csv_row(entry: MarketLocationEntry) -> dict[str, Any]:
+    """Flatten a MarketLocationEntry into a row keyed by `CSV_FIELDS`."""
+    detail = entry.market_location_detail
+    ref = detail.market_location_ref
+    ml = detail.market_location
+    deactivated = detail.last_deactivated_time
+    return {
+        "enterprise_id": entry.enterprise_id,
+        "market_area": ref.market_area.name,
+        "location_id": ref.market_location_id.value,
+        "id_type": ref.market_location_id.type.name,
+        "display_name": ml.display_name,
+        "directions": ";".join(d.name for d in ml.supported_directions),
+        "time_resolution": ml.time_resolution.name,
+        "is_active": detail.is_active,
+        "revision": detail.revision,
+        "create_time": detail.create_time.isoformat(),
+        "update_time": detail.update_time.isoformat(),
+        "last_deactivated_time": deactivated.isoformat() if deactivated else "",
+    }
+
+
 def print_operation_result(
     result: MarketLocationOperationResult, raw: bool = False
 ) -> None:
@@ -162,7 +203,10 @@ def print_operation_result(
 )
 @click.option(
     "--auth-key",
-    help="API auth key for authentication",
+    help=(
+        "API auth key for authentication. If neither key nor secret is given, "
+        "both are read from FREQUENZ_API_KEY and FREQUENZ_API_SECRET."
+    ),
     envvar="MARKETMETERING_API_AUTH_KEY",
     show_envvar=True,
     required=False,
@@ -194,10 +238,16 @@ async def cli(
     if ctx.obj is None:
         ctx.obj = {}
 
+    # Take the fallback as a pair so a key and secret from different sources
+    # are never combined.
+    if not auth_key and not sign_secret:
+        auth_key = os.environ.get("FREQUENZ_API_KEY")
+        sign_secret = os.environ.get("FREQUENZ_API_SECRET")
+
     if not auth_key:
         raise click.BadParameter(
-            "You must provide an API auth key using --auth-key or "
-            "the MARKETMETERING_API_AUTH_KEY environment variable."
+            "You must provide an API auth key using --auth-key or the "
+            "MARKETMETERING_API_AUTH_KEY (or FREQUENZ_API_KEY) environment variable."
         )
 
     click.echo(f"Using API URL: {url}", err=True)
@@ -463,15 +513,16 @@ async def create_cmd(
     help="Activation filter (default: ONLY_ACTIVE)",
 )
 @click.option(
-    "--all-pages",
-    is_flag=True,
-    default=False,
-    help="Fetch all pages (default: first page only)",
+    "--format",
+    "output_format",
+    type=click.Choice(["text", "csv"]),
+    default="text",
+    help="Output format (default: text)",
 )
 async def list_cmd(
     ctx: click.Context,
     activation: str,
-    all_pages: bool,
+    output_format: str,
 ) -> None:
     """List Market Locations for the authenticated enterprise.
 
@@ -480,10 +531,12 @@ async def list_cmd(
 
         list --activation ALL
 
+        list --activation ALL --format csv > malos.csv
+
     Args:
         ctx: Click context with client and options.
         activation: Activation status filter.
-        all_pages: Whether to fetch all pages.
+        output_format: Output format, `text` or `csv`.
     """
     client: MarketMeteringApiClient = ctx.obj["client"]
     raw: bool = ctx.obj["raw"]
@@ -491,6 +544,14 @@ async def list_cmd(
     filters = MarketLocationsFilter(
         activation_filter=ActivationFilter[activation],
     )
+
+    writer = (
+        csv.DictWriter(sys.stdout, fieldnames=CSV_FIELDS, lineterminator="\n")
+        if output_format == "csv"
+        else None
+    )
+    if writer:
+        writer.writeheader()
 
     total = 0
     next_page = None
@@ -500,10 +561,13 @@ async def list_cmd(
             pagination_params=next_page,
         )
         for entry in entries:
-            print_detail(entry.market_location_detail, raw=raw)
+            if writer:
+                writer.writerow(csv_row(entry))
+            else:
+                print_detail(entry.market_location_detail, raw=raw)
             total += 1
 
-        if not all_pages or next_page is None:
+        if next_page is None:
             break
 
     click.echo(f"Total: {total} location(s)", err=True)
